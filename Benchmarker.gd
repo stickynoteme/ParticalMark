@@ -11,13 +11,13 @@ var language = null
 var arg_bench = "--bench="
 var arg_lang = "--lang="
 
-# bunnymark
-var bunnymark_target = 60.0
-var bunnymark_target_error = 0.5
-var benchmark_is_bunnymark = false
-var bunnymark_update_interval = 2.0
+# particlemark
+var particlemark_target = 60.0
+var particlemark_target_error = 0.5
+var benchmark_is_particlemark = false
+var particlemark_update_interval = 2.0
 var stable_updates_required = 3
-var bunnymark_update_elapsed_time = 0.0
+var particlemark_update_elapsed_time = 0.0
 var stable_updates = 0
 
 var nativescript_languages = {
@@ -31,7 +31,7 @@ func _ready():
 	fps_label = get_node("Panel/FPS")
 	benchmark_container = get_node("BenchmarkContainer")
 
-	benchmark = "BunnymarkV2"
+	benchmark = "particlemarkV2"
 	language = "gd"
 
 	var args = OS.get_cmdline_args()
@@ -48,16 +48,16 @@ func _process(delta):
 	if elapsed_time >= fps_update_interval:
 		fps_label.text = "FPS: " + str(Engine.get_frames_per_second())
 		elapsed_time = 0.0
-	if benchmark_is_bunnymark:
-		update_bunnymark(delta)
+	if benchmark_is_particlemark:
+		update_particlemark(delta)
 
 func start_benchmark(benchmark_name, language):
 	var language_extension = language
 	if nativescript_languages.has(language) and nativescript_languages[language]:
 		language_extension = "gdns"
 	var script_path = "res://benchmarks/" + benchmark_name + "/" + language + "/" + benchmark_name + "." + language_extension
-	benchmark_is_bunnymark = benchmark_name.begins_with("Bunnymark")
-	bunnymark_update_elapsed_time = bunnymark_update_interval
+	benchmark_is_particlemark = benchmark_name.begins_with("particlemark")
+	particlemark_update_elapsed_time = particlemark_update_interval
 	var script = load(script_path)
 	benchmark_node = Node2D.new()
 	benchmark_node.set_script(script)
@@ -96,17 +96,17 @@ func write_result(output):
 	benchmark_file["run_date"] = OS.get_datetime()
 	file.store_string(JSON.print(benchmark_file))
 
-func update_bunnymark(delta):
-	bunnymark_update_elapsed_time += delta
-	if bunnymark_update_elapsed_time > bunnymark_update_interval:
+func update_particlemark(delta):
+	particlemark_update_elapsed_time += delta
+	if particlemark_update_elapsed_time > particlemark_update_interval:
 		var fps = Engine.get_frames_per_second()
-		var difference = fps - bunnymark_target
+		var difference = fps - particlemark_target
 		var bunny_difference = 0
-		if difference > bunnymark_target_error:
+		if difference > particlemark_target_error:
 			bunny_difference = min(1000, max(1, floor(20 * difference)))
-		elif difference < -bunnymark_target_error:
+		elif difference < -particlemark_target_error:
 			bunny_difference = max(-1000, min(-1, -1*ceil(20 * difference)))
-		if abs(difference) < bunnymark_target_error:
+		if abs(difference) < particlemark_target_error:
 			stable_updates += 1
 			if stable_updates == stable_updates_required:
 				benchmark_node.finish()
@@ -120,4 +120,4 @@ func update_bunnymark(delta):
 
 			stable_updates = 0
 
-		bunnymark_update_elapsed_time = 0.0
+		particlemark_update_elapsed_time = 0.0
